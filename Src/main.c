@@ -687,6 +687,8 @@ volatile uint8_t screenCount=0;
 uint16_t ScrData [61];
 uint8_t SCRN=0;
 
+uint8_t blinkDot = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -1677,6 +1679,13 @@ int main(void)
 				GlobalDay=RTC_Date1.WeekDay-1;
     		//GlobalSec=RTC_DateTime.Seconds;
     	}
+			if(state==0x14 && RTC_DateTime.Seconds!=prev_sec)
+			{
+				if(blinkDot) {blinkDot=0;}
+				else {blinkDot=1;}
+				sc_up=1;
+			}
+			prev_sec=RTC_DateTime.Seconds;
 			if(state != 0x00)
 			{
 				uint8_t needStart = timeToStart(aeroDays[RTC_Date1.WeekDay-1]);
@@ -2374,10 +2383,10 @@ int main(void)
 					{
 						sc_up=0;
 
-						twolines("    我","    奈");
+						twolines("   我","   奈");
 						scr_day(screenDay,0,0,0);		
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,0);
 						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
@@ -2409,10 +2418,10 @@ int main(void)
 					{
 						sc_up=0;
 
-						twolines("    我","    奈");
+						twolines("   我","   奈");
 						scr_day(screenDay,0,0,0);		
 						scr_cnt(screenCount,1,0,0);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,0);
 						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
@@ -2427,13 +2436,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,1);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,1);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2445,10 +2454,10 @@ int main(void)
 					{
 						sc_up=0;
 
-						twolines("    我","    奈");
+						twolines("   我","   奈");
 						scr_day(screenDay,0,0,0);		
 						scr_cnt(screenCount,1,0,0);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,0);
 						//PrintN(&SCRN);							
 					}
 					Tick1=HAL_GetTick();
@@ -2463,13 +2472,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,2);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,2);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2481,10 +2490,10 @@ int main(void)
 					{
 						sc_up=0;
 
-						twolines("    我","    奈");
+						twolines("   我","   奈");
 						scr_day(screenDay,0,0,0);		
 						scr_cnt(screenCount,1,0,0);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,0);
 						//PrintN(&SCRN);							
 					}
 					Tick1=HAL_GetTick();
@@ -2499,13 +2508,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,1);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,1);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2517,10 +2526,10 @@ int main(void)
 					{
 						sc_up=0;
 
-						twolines("    我","    奈");
+						twolines("   我","   奈");
 						scr_day(screenDay,0,0,0);		
 						scr_cnt(screenCount,1,0,0);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);							
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,30,0);							
 						//PrintN(&SCRN);
 					}
 					Tick1=HAL_GetTick();
@@ -2535,13 +2544,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,2);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,2);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,30,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2607,7 +2616,13 @@ int main(void)
 				{
 					if (sc_up)
 					{
-						twolines("睦","");
+						scr_day(screenDay,1,0,0);	
+						placedchar(48+GlobalHr/10,34,1);
+  	  			placedchar(48+GlobalHr%10,40,1);
+						if(blinkDot) {placedchar(58,45,1);}
+						else {placedchar(0x01,45,1);}
+  	  			placedchar(48+GlobalMin/10,49,1);
+  	  			placedchar(48+GlobalMin%10,55,1);
 						sc_up=0;
 						PrintN(&SCRN);
 					}
