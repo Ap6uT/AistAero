@@ -983,14 +983,14 @@ void placedchar(char l1,int plc,int ln)
 	uint8_t i,j=0;
 	if (ln==0)
 	{
-		for(i=plc; (i<61)&&(i<plc+6); i++)
+		for(i=plc; (i<62)&&(i<plc+6); i++)
 		{
 			ScrData[i]=(ScrData[i]&0xFF00)+CharSet[l1][i-plc];
 		}
 	}
 	else
 	{
-		for(i=plc; (i<61)&&(i<plc+6); i++)
+		for(i=plc; (i<62)&&(i<plc+6); i++)
 		{
 			ScrData[i]=(ScrData[i]&0x00FF)+((uint16_t)CharSet[l1][i-plc]*0x100);
 		}
@@ -1688,7 +1688,7 @@ int main(void)
 				sc_up=1;
 				prev_min = 61;
 				prev_sec=61;
-				clearscreen(0);
+				//clearscreen(0);
 				ClearArr();
 				MOTOR_TIME1=HowTimeToStop(aeroDays[RTC_Date1.WeekDay-1].aeroTimes[currentTime])*60;
 				NOTSLEEP=1;
@@ -1730,7 +1730,7 @@ int main(void)
 				{
 					if ((ADC_b>minADCButtonOk)&&(ADC_b<maxADCButtonOk))
 					{
-						delay(700);
+						delay(400);
 						if (!but_p)
 						{
 							but_p=1;
@@ -1748,7 +1748,7 @@ int main(void)
 					}
 					else if ((ADC_b>=minADCButtonPlus)&&(ADC_b<maxADCButtonPlus))
 					{
-						delay(700);
+						delay(400);
 						if (!but_plus)
 						{
 							but_plus=1;
@@ -1767,7 +1767,7 @@ int main(void)
 					}
 					else if ((ADC_b>=minADCButtonMinus)&&(ADC_b<maxADCButtonMinus))
 					{
-						delay(700);
+						delay(400);
 						if (!but_minus)
 						{
 							no_but=0;
@@ -1825,12 +1825,16 @@ int main(void)
 							col=3;
 						}
 						
-						clearscreen(0);
+						//clearscreen(0);
 						ClearArr();
 						prevstate=state;
 						//scr_cnt(ADC_b,0,0,0);
 						state=stateTable[state][col];
 						sc_up=1;
+						if (state==0x07 && prevstate!=0x0A)
+						{
+							screenCount= *aeroDays[screenDay].daysCount;
+						}
 						
 						if (but_p_ts && isChange(state))
 						{
@@ -1908,7 +1912,12 @@ int main(void)
 								}
 								case 0x0B:
 								{
-									screenCount=PlusOne(screenCount,25,but_plus | but_plus_ts);
+									screenCount=PlusOne(screenCount,*aeroDays[screenDay].daysCount+1,but_plus | but_plus_ts);
+									if(screenCount==0)
+									{
+										if(but_plus || but_plus_ts) {screenCount=1;}
+										else {screenCount=*aeroDays[screenDay].daysCount;}
+									}
 									VAR_CH=screenDay+1;
 									break;
 								}
@@ -2072,7 +2081,7 @@ int main(void)
 						twolines("ÓÑÒ","ÂÐÅÌß");
 						scr_time(GlobalHr,GlobalMin,1,35,0);
 						sc_up=0;
-						PrintN(&SCRN);
+						//PrintN(&SCRN);
 					}
 					TIME_CH=1;
 					//if(but_p_ts||but_minus_ts||but_plus_ts){scr_day(GlobalDay,0,40,0);}
@@ -2105,7 +2114,7 @@ int main(void)
 					{
 						twolines("ÓÑÒ","ÂÐÅÌß");
 						sc_up=0;
-						PrintN(&SCRN);
+						//PrintN(&SCRN);
 					}
 					TIME_CH=1;
 					//if(but_p_ts||but_minus_ts||but_plus_ts){scr_time(GlobalHr,GlobalMin,1,35,0);}
@@ -2138,7 +2147,7 @@ int main(void)
 					{
 						twolines("ÓÑÒ","ÂÐÅÌß");
 						sc_up=0;
-						PrintN(&SCRN);
+						//PrintN(&SCRN);
 					}
 					TIME_CH=1;
 					//if(but_p_ts||but_minus_ts||but_plus_ts){scr_time(GlobalHr,GlobalMin,1,35,0);}
@@ -2196,7 +2205,7 @@ int main(void)
 						}
 						//scr_cnt(screenCount,0,42,0);
 						scr_day(screenDay,0,0,0);
-						PrintN(&SCRN);
+						//PrintN(&SCRN);
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2218,6 +2227,7 @@ int main(void)
 							scr_cnt(screenCount,0,42,0);
 						}
 						PrintN(&SCRN);
+						*aeroDays[screenDay].daysCount=screenCount;
 					}	
 					break;
 				}
@@ -2237,7 +2247,7 @@ int main(void)
 						}
 						scr_cnt(screenCount,0,42,0);
 						scr_day(screenDay,0,0,0);		
-						PrintN(&SCRN);						
+						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2271,7 +2281,7 @@ int main(void)
 						
 						scr_cnt(screenCount,0,42,0);
 						scr_day(screenDay,0,0,0);		
-						PrintN(&SCRN);
+						//PrintN(&SCRN);
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2319,7 +2329,7 @@ int main(void)
 						}
 						scr_cnt(screenCount,0,42,0);
 						scr_day(screenDay,0,0,0);		
-						PrintN(&SCRN);						
+						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2368,7 +2378,7 @@ int main(void)
 						scr_day(screenDay,0,0,0);		
 						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
 						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
-						PrintN(&SCRN);						
+						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2401,9 +2411,9 @@ int main(void)
 
 						twolines("    ÎÒ","    ÄÎ");
 						scr_day(screenDay,0,0,0);		
-						scr_cnt(screenCount,1,0,1);
+						scr_cnt(screenCount,1,0,0);
 						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
-						PrintN(&SCRN);						
+						//PrintN(&SCRN);						
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2437,9 +2447,9 @@ int main(void)
 
 						twolines("    ÎÒ","    ÄÎ");
 						scr_day(screenDay,0,0,0);		
-						scr_cnt(screenCount,1,0,1);
+						scr_cnt(screenCount,1,0,0);
 						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
-						PrintN(&SCRN);							
+						//PrintN(&SCRN);							
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2473,9 +2483,9 @@ int main(void)
 
 						twolines("    ÎÒ","    ÄÎ");
 						scr_day(screenDay,0,0,0);		
-						scr_cnt(screenCount,1,0,1);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,1,36,0);
-						PrintN(&SCRN);							
+						scr_cnt(screenCount,1,0,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);
+						//PrintN(&SCRN);							
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2489,13 +2499,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,0,36,1);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,1);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,0,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2509,9 +2519,9 @@ int main(void)
 
 						twolines("    ÎÒ","    ÄÎ");
 						scr_day(screenDay,0,0,0);		
-						scr_cnt(screenCount,1,0,1);
-						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,1,36,0);							
-						PrintN(&SCRN);
+						scr_cnt(screenCount,1,0,0);
+						scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].startHour,*aeroDays[screenDay].aeroTimes[screenCount-1].startMin,0,36,0);							
+						//PrintN(&SCRN);
 					}
 					Tick1=HAL_GetTick();
 					if((Tick1-Tick2)>250)
@@ -2525,13 +2535,13 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,0,36,2);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,2);
 
 						}
 						else
 						{
 							blon=1;
-							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,0,36,0);
+							scr_time(*aeroDays[screenDay].aeroTimes[screenCount-1].stopHour,*aeroDays[screenDay].aeroTimes[screenCount-1].stopMin,1,36,0);
 						}
 						PrintN(&SCRN);
 					}
@@ -2630,7 +2640,8 @@ int main(void)
 	      			    SPI_syn_out(rele);
 									////TIM_Cmd(TIM3, DISABLE);
 
-    		  	  		clearscreen(0);
+    		  	  		//clearscreen(0);
+									screenDay=0;
 									ClearArr();
 									state=0x14;
     		  	  		sc_up=1;
@@ -2648,17 +2659,18 @@ int main(void)
     		  	  			RTC_DateTime.Seconds = 00;
     		  	  			HAL_RTC_SetTime(&hrtc, &RTC_DateTime, RTC_FORMAT_BIN);
     		  	  		}
-    		  	  		if (VAR_CH && !isChange(state))
-    		  	  		{
-										FLSH_WRT_N=VAR_CH;
-    		  	  			VAR_CH=0;
-    		  	  		}
+    		  	  		
     		  	  		
 									//TIM22->CR1 &= (uint16_t)(~((uint16_t)TIM_CR1_CEN));
 									//HAL_TIM_Base_Stop_IT(&htim22);
 									flag20=0;
     		  	  		MAYSLEEP=1;
     		  	  	}
+								if (VAR_CH && !isChange(state))
+								{
+									FLSH_WRT_N=VAR_CH;
+									VAR_CH=0;
+								}
     		  	  	if (FLSH_WRT_N)
     		  	  	{
 									FlashRoyal(FLSH_WRT_N-1);

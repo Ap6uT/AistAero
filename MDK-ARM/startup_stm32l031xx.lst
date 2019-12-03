@@ -361,11 +361,12 @@ ARM Macro Assembler    Page 6
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0+ --apcs=inter
 work --depend=usart_031\startup_stm32l031xx.d -ousart_031\startup_stm32l031xx.o
- -IC:\Keil_v5\workspace\aero_031\MDK-ARM\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\4.
-5.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include
- --predefine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --predefine="__UVI
-SION_VERSION SETA 521" --predefine="_RTE_ SETA 1" --predefine="STM32L031xx SETA
- 1" --list=startup_stm32l031xx.lst startup_stm32l031xx.s
+ -I.\RTE\_usart_031 -IC:\Users\AlexanderGrishin\AppData\Local\Arm\Packs\ARM\CMS
+IS\4.5.0\CMSIS\Include -IC:\Users\AlexanderGrishin\AppData\Local\Arm\Packs\Keil
+\STM32L0xx_DFP\1.5.0\Device\Include --predefine="__EVAL SETA 1" --predefine="__
+MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 529" --predefine="_RTE_ SE
+TA 1" --predefine="STM32L031xx SETA 1" --list=startup_stm32l031xx.lst startup_s
+tm32l031xx.s
 
 
 
