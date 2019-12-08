@@ -72,7 +72,7 @@
 #define K1 1
 
 
-const uint8_t stateTable[21][6] ={
+const uint8_t stateTable[25][6] ={
 	{0x00,0x00,0x00,0x00,0x00,0x00}, //0x00 aero
 	{0x02,0x02,0x02,0x02,0x02,0x02}, //0x01	auto
 	{0x03,0x06,0x06,0x14,0x02,0x02}, //0x02 set time
@@ -94,6 +94,10 @@ const uint8_t stateTable[21][6] ={
 	{0x13,0x14,0x14,0x10,0x12,0x12}, //0x12
 	{0x12,0x13,0x13,0x13,0x13,0x13}, //0x13
 	{0x02,0x02,0x02,0x12,0x14,0x14}, //0x14
+	{0x15,0x15,0x15,0x15,0x15,0x15}, //0x15
+	{0x17,0x14,0x14,0x12,0x16,0x16}, //0x16
+	{0x16,0x18,0x17,0x17,0x17,0x17}, //0x17
+	{0x16,0x17,0x18,0x18,0x18,0x18}, //0x18
 };
 
 const uint8_t state_tabl[40][2] ={
@@ -941,7 +945,7 @@ void PrintScreen(uint8_t p)
 			  WriteData(ScrData[c]%0x100);
 		}
 	WriteCode((p*2+1)|0xB8);//Установка текущей страницы для обоих кристаллов индикатора
-	WriteCode(0x00);//Установка текущего адреса для записи данных в 0
+	WriteCode(0x00);//Установка текущего адреса для записи данных ВС
 		for(c=0; c<61; c++) //посимвольный цикл вывода
 			{
 				  WriteData(ScrData[c]/0x100);
@@ -1058,6 +1062,12 @@ void scr_day(uint8_t day, uint8_t lin, uint8_t clm, uint8_t shine)
 			case 6:
 			{
 				placed2char("ВС",clm,lin);
+				break;
+			}
+			case 7:
+			{
+				placed2char("!B",clm,lin);
+				placed2char("CE",clm+12,lin);
 				break;
 			}
 			default:
@@ -1258,35 +1268,53 @@ uint16_t HowTimeToStop(AeroTime time)
 	return 0;
 }
 
+void CleanDay(uint8_t day)
+{
+	if (day<7)
+	{
+		uint8_t i;
+		for(i=0;i<24;i++)
+		{
+			aeroDays[day].aeroTimes[i].startHour=0;
+			aeroDays[day].aeroTimes[i].startMin=0;
+			aeroDays[day].aeroTimes[i].stopHour=0;
+			aeroDays[day].aeroTimes[i].stopMin=0;
+		}
+	}
+}
+
 void FlashRoyal(uint8_t day)
 {
-	uint32_t Buf[25];
-	uint8_t i;
-	uint32_t PgError = 0;
-	uint32_t adress = ST_ADR + 0x100 * day;
-	Buf[0]=(uint32_t)((uint8_t)*aeroDays[day].active*0x1000000+(uint8_t)*aeroDays[day].daysCount*0x10000+(uint8_t)MBAdr*0x100+(uint8_t)MBSpeed);
-	for(i=0;i<24;i++)
+	if (day<7)
 	{
-		Buf[i+1]=(uint32_t)((uint8_t)*aeroDays[day].aeroTimes[i].startHour*0x1000000+(uint8_t)*aeroDays[day].aeroTimes[i].startMin*0x10000+
-		(uint8_t)*aeroDays[day].aeroTimes[i].stopHour*0x100+(uint8_t)*aeroDays[day].aeroTimes[i].stopMin);
-	}
-	HAL_FLASH_Unlock();
-	
-	FLASH_EraseInitTypeDef Flash_eraseInitStruct;
-	Flash_eraseInitStruct.TypeErase     = FLASH_TYPEERASE_PAGES;
-	Flash_eraseInitStruct.PageAddress  = adress;
-	Flash_eraseInitStruct.NbPages        = 1;
+		uint32_t Buf[25];
+		uint8_t i;
+		uint32_t PgError = 0;
+		uint32_t adress = ST_ADR + 0x100 * day;
+		Buf[0]=(uint32_t)((uint8_t)*aeroDays[day].active*0x1000000+(uint8_t)*aeroDays[day].daysCount*0x10000+(uint8_t)MBAdr*0x100+(uint8_t)MBSpeed);
+		for(i=0;i<24;i++)
+		{
+			Buf[i+1]=(uint32_t)((uint8_t)*aeroDays[day].aeroTimes[i].startHour*0x1000000+(uint8_t)*aeroDays[day].aeroTimes[i].startMin*0x10000+
+			(uint8_t)*aeroDays[day].aeroTimes[i].stopHour*0x100+(uint8_t)*aeroDays[day].aeroTimes[i].stopMin);
+		}
+		HAL_FLASH_Unlock();
+		
+		FLASH_EraseInitTypeDef Flash_eraseInitStruct;
+		Flash_eraseInitStruct.TypeErase     = FLASH_TYPEERASE_PAGES;
+		Flash_eraseInitStruct.PageAddress  = adress;
+		Flash_eraseInitStruct.NbPages        = 1;
 
-	if(HAL_FLASHEx_Erase(&Flash_eraseInitStruct, &PgError) != HAL_OK)
-	{
-		 HAL_FLASH_Lock();
-	}
+		if(HAL_FLASHEx_Erase(&Flash_eraseInitStruct, &PgError) != HAL_OK)
+		{
+			 HAL_FLASH_Lock();
+		}
 
-	for(i=0;i<25;i++)
-	{
-		HAL_FLASH_Program(TYPEPROGRAM_WORD, adress+i*4,Buf[i]);
+		for(i=0;i<25;i++)
+		{
+			HAL_FLASH_Program(TYPEPROGRAM_WORD, adress+i*4,Buf[i]);
+		}
+		HAL_FLASH_Lock();
 	}
-	HAL_FLASH_Lock();
 }
 
 
@@ -1954,6 +1982,11 @@ int main(void)
 									VAR_CH=screenDay+1;
 									break;
 								}
+								case 0x13:
+								{
+									screenDay=PlusOne(screenDay,8,but_plus | but_plus_ts);
+									break;
+								}
 							}
 						}		
 						
@@ -2618,17 +2651,155 @@ int main(void)
 					{
 						scr_day(screenDay,1,0,0);	
 						placedchar(48+GlobalHr/10,34,1);
-  	  			placedchar(48+GlobalHr%10,40,1);
+						placedchar(48+GlobalHr%10,40,1);
 						if(blinkDot) {placedchar(58,45,1);}
 						else {placedchar(0x01,45,1);}
-  	  			placedchar(48+GlobalMin/10,49,1);
-  	  			placedchar(48+GlobalMin%10,55,1);
+						placedchar(48+GlobalMin/10,49,1);
+						placedchar(48+GlobalMin%10,55,1);
 						sc_up=0;
 						PrintN(&SCRN);
 					}
 					break;
 				}
+				case 0x15:
+				{
+					if (sc_up)
+					{
+						twolines("ИДET СБРОC","");
+						scr_day(screenDay,1,0,0);
+						PrintN(&SCRN);
+						if(screenDay>6)
+						{
+							uint8_t iDay=0;
+							for(iDay=0;iDay<7;iDay++)
+							{
+								CleanDay(iDay);
+								FlashRoyal(iDay);
+							}
+							HAL_Delay(400);
+						}
+						else 
+						{
+							CleanDay(screenDay);
+							FlashRoyal(screenDay);
+							HAL_Delay(800);
+						}
+						
+					}
+					state=0x13;
+					break;
+				}
+				case 0x16:
+				{
+					if (sc_up)
+					{
+						sc_up=0;
+						twolines("","MODBUS");
+						PrintN(&SCRN);
+					}
+					break;
+				}
 				
+				case 0x1A:
+				{
+					if (sc_up)
+					{
+						sc_up=0;
+						clearscreen(0);
+						oneline(0,"?????");
+						switch(MBSpeed)
+						{
+							case 0: {oneline(1,"???   2400");break;}
+							case 1: {oneline(1,"???   4800");break;}
+							case 2: {oneline(1,"???   9600");break;}
+							case 3: {oneline(1,"???  14400");break;}
+							case 4: {oneline(1,"???  19200");break;}
+							case 5: {oneline(1,"???  38400");break;}
+							case 6: {oneline(1,"???  56000");break;}
+							case 7: {oneline(1,"???  57600");break;}
+							case 8: {oneline(1,"??? 115200");break;}
+							default: {oneline(1,"???o115200");break;}
+						}
+					}
+					Tick1=HAL_GetTick();
+					if((Tick1-Tick2)>250)
+					{
+						blink=1;
+						Tick2=Tick1;
+					}
+					if(blink)
+					{
+						blink=0;
+						if(blon)
+						{
+							blon=0;
+							scr_cnt(MBAdr,0,36,state/0x10);
+						}
+						else
+						{
+							blon=1;
+							scr_cnt(MBAdr,0,36,0);
+						}
+						PrintN(&SCRN);
+					}
+					break;
+				}
+				case 0x2A:
+				{
+					if (sc_up)
+					{
+						NeedChangeSpeed=1;
+						sc_up=0;
+						clearscreen(0);
+						oneline(0,"?????");
+						scr_cnt(MBAdr,0,36,0);
+						switch(MBSpeed)
+						{
+							case 0: {oneline(1,"???   2400");break;}
+							case 1: {oneline(1,"???   4800");break;}
+							case 2: {oneline(1,"???   9600");break;}
+							case 3: {oneline(1,"???  14400");break;}
+							case 4: {oneline(1,"???  19200");break;}
+							case 5: {oneline(1,"???  38400");break;}
+							case 6: {oneline(1,"???  56000");break;}
+							case 7: {oneline(1,"???  57600");break;}
+							case 8: {oneline(1,"??? 115200");break;}
+						}
+					}
+					Tick1=HAL_GetTick();
+					if((Tick1-Tick2)>250)
+					{
+						blink=1;
+						Tick2=Tick1;
+					}
+					if(blink)
+					{
+						blink=0;
+						if(blon)
+						{
+							blon=0;
+							oneline(1,"???       ");
+						}
+						else
+						{
+							blon=1;
+							switch(MBSpeed)
+							{
+								case 0: {oneline(1,"???   2400");break;}
+								case 1: {oneline(1,"???   4800");break;}
+								case 2: {oneline(1,"???   9600");break;}
+								case 3: {oneline(1,"???  14400");break;}
+								case 4: {oneline(1,"???  19200");break;}
+								case 5: {oneline(1,"???  38400");break;}
+								case 6: {oneline(1,"???  56000");break;}
+								case 7: {oneline(1,"???  57600");break;}
+								case 8: {oneline(1,"??? 115200");break;}
+							}
+						}
+						PrintN(&SCRN);
+					}
+					break;
+				}
 				
     		      		
     	}
