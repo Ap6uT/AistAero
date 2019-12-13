@@ -986,7 +986,7 @@ void placedchar(char l1,int plc,int ln)
 		for(l=0; l<6; l++) {
 			WriteData(CharSet[l1][l]);
 		}*/
-	uint8_t i,j=0;
+	uint8_t i=0;
 	if (ln==0)
 	{
 		for(i=plc; (i<62)&&(i<plc+6); i++)
@@ -1188,7 +1188,7 @@ void oneline(uint8_t line,char l1[10])
 	uint8_t p1; 
 	p1=strlen(l1);
 	uint8_t c; 
-	uint8_t l; 
+
 
 		for(c=0; c<p1; c++) {
 			placedchar(l1[c],c*6,line);
@@ -1417,6 +1417,68 @@ uint8_t isChange(uint8_t state)
 	if((state>=0x03 && state<=0x05)||(state>=0x07 && state<=0x0F))
 	{
 		return 1;
+	}
+	return 0;
+}
+
+
+/*#define MBAdr reg_MB[0]
+#define MBSpeed reg_MB[1]
+
+#define GlobalHr reg_MB[2]
+#define GlobalMin reg_MB[3]
+#define GlobalDay reg_MB[4]
+#define MBOn reg_MB[5]*/
+/*aeroDays[i].active = &reg_MB[6+i];
+		aeroDays[i].daysCount = &reg_MB[13+i];
+		for(j=0;j<24;j++)
+		{
+			aeroDays[i].aeroTimes[j].startHour = &reg_MB[20+j*4+i*96];
+			aeroDays[i].aeroTimes[j].startMin = &reg_MB[21+j*4+i*96];
+			aeroDays[i].aeroTimes[j].stopHour = &reg_MB[22+j*4+i*96];
+			aeroDays[i].aeroTimes[j].stopMin = &reg_MB[23+j*4+i*96];   92+576+23  */
+uint8_t canWrite(uint8_t value, uint16_t adr)
+{
+	if (adr==0 && value<247)
+	{
+		return 1;
+	}
+	else if (adr==1 && value<9)
+	{
+		return 1;
+	}
+	else if (adr==2 && value<24)
+	{
+		return 1;
+	}
+	else if (adr==3 && value<60)
+	{
+		return 1;
+	}
+	else if (adr==4 && value<7)
+	{
+		return 1;
+	}
+	else if (adr>5 && adr<13 && value<2)
+	{
+		return 1;
+	}
+	else if (adr>12 && adr<20 && value<25)
+	{
+		return 1;
+	}
+	else if (adr>19 && adr<692)
+	{
+		if (adr%2==0)
+		{
+			if (value<24) {return 1;}
+			else {return 0;}
+		}
+		else
+		{
+			if (value<60) {return 1;}
+			else {return 0;}
+		}
 	}
 	return 0;
 }
@@ -2706,19 +2768,19 @@ int main(void)
 					{
 						sc_up=0;
 						clearscreen(0);
-						oneline(0,"?????");
+						oneline(0,"адрес");
 						switch(MBSpeed)
 						{
-							case 0: {oneline(1,"???   2400");break;}
-							case 1: {oneline(1,"???   4800");break;}
-							case 2: {oneline(1,"???   9600");break;}
-							case 3: {oneline(1,"???  14400");break;}
-							case 4: {oneline(1,"???  19200");break;}
-							case 5: {oneline(1,"???  38400");break;}
-							case 6: {oneline(1,"???  56000");break;}
-							case 7: {oneline(1,"???  57600");break;}
-							case 8: {oneline(1,"??? 115200");break;}
-							default: {oneline(1,"???o115200");break;}
+							case 0: {oneline(1,"скр   2400");break;}
+							case 1: {oneline(1,"скр   4800");break;}
+							case 2: {oneline(1,"скр   9600");break;}
+							case 3: {oneline(1,"скр  14400");break;}
+							case 4: {oneline(1,"скр  19200");break;}
+							case 5: {oneline(1,"скр  38400");break;}
+							case 6: {oneline(1,"скр  56000");break;}
+							case 7: {oneline(1,"скр  57600");break;}
+							case 8: {oneline(1,"скр 115200");break;}
+							default: {oneline(1,"скрo115200");break;}
 						}
 					}
 					Tick1=HAL_GetTick();
@@ -2751,19 +2813,20 @@ int main(void)
 						NeedChangeSpeed=1;
 						sc_up=0;
 						clearscreen(0);
-						oneline(0,"?????");
+						oneline(0,"адрес");
 						scr_cnt(MBAdr,0,36,0);
 						switch(MBSpeed)
 						{
-							case 0: {oneline(1,"???   2400");break;}
-							case 1: {oneline(1,"???   4800");break;}
-							case 2: {oneline(1,"???   9600");break;}
-							case 3: {oneline(1,"???  14400");break;}
-							case 4: {oneline(1,"???  19200");break;}
-							case 5: {oneline(1,"???  38400");break;}
-							case 6: {oneline(1,"???  56000");break;}
-							case 7: {oneline(1,"???  57600");break;}
-							case 8: {oneline(1,"??? 115200");break;}
+							case 0: {oneline(1,"скр   2400");break;}
+							case 1: {oneline(1,"скр   4800");break;}
+							case 2: {oneline(1,"скр   9600");break;}
+							case 3: {oneline(1,"скр  14400");break;}
+							case 4: {oneline(1,"скр  19200");break;}
+							case 5: {oneline(1,"скр  38400");break;}
+							case 6: {oneline(1,"скр  56000");break;}
+							case 7: {oneline(1,"скр  57600");break;}
+							case 8: {oneline(1,"скр 115200");break;}
+							default: {oneline(1,"скрo115200");break;}
 						}
 					}
 					Tick1=HAL_GetTick();
@@ -2778,22 +2841,23 @@ int main(void)
 						if(blon)
 						{
 							blon=0;
-							oneline(1,"???       ");
+							oneline(1,"скр       ");
 						}
 						else
 						{
 							blon=1;
 							switch(MBSpeed)
 							{
-								case 0: {oneline(1,"???   2400");break;}
-								case 1: {oneline(1,"???   4800");break;}
-								case 2: {oneline(1,"???   9600");break;}
-								case 3: {oneline(1,"???  14400");break;}
-								case 4: {oneline(1,"???  19200");break;}
-								case 5: {oneline(1,"???  38400");break;}
-								case 6: {oneline(1,"???  56000");break;}
-								case 7: {oneline(1,"???  57600");break;}
-								case 8: {oneline(1,"??? 115200");break;}
+								case 0: {oneline(1,"скр   2400");break;}
+								case 1: {oneline(1,"скр   4800");break;}
+								case 2: {oneline(1,"скр   9600");break;}
+								case 3: {oneline(1,"скр  14400");break;}
+								case 4: {oneline(1,"скр  19200");break;}
+								case 5: {oneline(1,"скр  38400");break;}
+								case 6: {oneline(1,"скр  56000");break;}
+								case 7: {oneline(1,"скр  57600");break;}
+								case 8: {oneline(1,"скр 115200");break;}
+								default: {oneline(1,"скрo115200");break;}
 							}
 						}
 						PrintN(&SCRN);
@@ -2912,13 +2976,14 @@ int main(void)
 				case 0x06:						//запись регистра
 				{
 						//if ((res_buffer[2]*0x100+res_buffer[3]==1)||(res_buffer[2]*0x100+res_buffer[3]==2))//если возможна запись регистра
-						if ((res_buffer[2]==0)&&(res_buffer[3]>2)&&(res_buffer[3]<15))
+					uint16_t regAdr = res_buffer[2]*0x100+res_buffer[3];
+						if (regAdr<692)
 						{
-							if (state != 0x00 || state != 0x18)
+							if (state != 0x00 || state != 0x11)
 							{
-								if((res_buffer[4]==0)&&(res_buffer[5]<MaxS[res_buffer[3]]))
+								if((res_buffer[4]==0)&& canWrite(res_buffer[5],regAdr))
 								{
-									reg_MB[res_buffer[3]]=res_buffer[5];
+									reg_MB[regAdr]=res_buffer[5];
 									if(res_buffer[3]==0x0E)
 									{
 										NeedChangeSpeed=1;
