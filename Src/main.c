@@ -45,7 +45,7 @@
 
 /* USER CODE BEGIN Includes */
 
-#define ST_ADR (uint32_t)(0x08007800)  
+#define ST_ADR (uint32_t)(0x08007000)  
 
 
 #define ST_ADRp (ST_ADR+8) ////((uint32_t)0x08008800)
@@ -91,9 +91,9 @@ const uint8_t stateTable[25][6] ={
 	{0x07,0x0B,0x0F,0x0F,0x0F,0x0F}, //0x0F
 	{0x11,0x12,0x12,0x06,0x10,0x10}, //0x10
 	{0x11,0x10,0x10,0x10,0x10,0x10}, //0x11
-	{0x13,0x14,0x14,0x10,0x12,0x12}, //0x12
+	{0x13,0x16,0x16,0x10,0x12,0x12}, //0x12
 	{0x12,0x13,0x13,0x13,0x13,0x13}, //0x13
-	{0x02,0x02,0x02,0x12,0x14,0x14}, //0x14
+	{0x02,0x02,0x02,0x16,0x14,0x14}, //0x14
 	{0x15,0x15,0x15,0x15,0x15,0x15}, //0x15
 	{0x17,0x14,0x14,0x12,0x16,0x16}, //0x16
 	{0x16,0x18,0x17,0x17,0x17,0x17}, //0x17
@@ -1064,10 +1064,75 @@ void scr_day(uint8_t day, uint8_t lin, uint8_t clm, uint8_t shine)
 				placed2char("ÂÑ",clm,lin);
 				break;
 			}
+
+			default:
+			{
+				placedchar(0x01,0+clm,lin);
+				placedchar(0x01,6+clm,lin);
+				break;
+			}
+		}
+	}
+}
+
+
+void scr_day_clear(uint8_t day, uint8_t lin, uint8_t clm, uint8_t shine)
+{
+	if (shine)
+	{
+		placedchar(0x01,0+clm,lin);
+  	placedchar(0x01,6+clm,lin);
+	}
+	else
+	{
+		switch (day)
+		{
+			case 0:
+			{
+				placed2char("ÏÍ",clm,lin);
+				break;
+			}
+			case 1:
+			{
+				placed2char("ÂÒ",clm,lin);
+				break;
+			}
+			case 2:
+			{
+				placed2char("ÑÐ",clm,lin);
+				break;
+			}
+			case 3:
+			{
+				placed2char("×Ò",clm,lin);
+				break;
+			}
+			case 4:
+			{
+				placed2char("ÏÒ",clm,lin);
+				break;
+			}
+			case 5:
+			{
+				placed2char("ÑÁ",clm,lin);
+				break;
+			}
+			case 6:
+			{
+				placed2char("ÂÑ",clm,lin);
+				break;
+			}
 			case 7:
 			{
 				placed2char("!B",clm,lin);
 				placed2char("CE",clm+12,lin);
+				break;
+			}
+			case 8:
+			{
+				placed2char("BÛ",clm,lin);
+				placed2char("ÕÎ",clm+12,lin);
+				placed2char("Ä",clm+24,lin);
 				break;
 			}
 			default:
@@ -1079,6 +1144,7 @@ void scr_day(uint8_t day, uint8_t lin, uint8_t clm, uint8_t shine)
 		}
 	}
 }
+
 
 void scr_time(uint8_t Hours, uint8_t Minutes, uint8_t lin, uint8_t clm, uint8_t shine)
 {
@@ -2046,7 +2112,7 @@ int main(void)
 								}
 								case 0x13:
 								{
-									screenDay=PlusOne(screenDay,8,but_plus | but_plus_ts);
+									screenDay=PlusOne(screenDay,9,but_plus | but_plus_ts);
 									break;
 								}
 							}
@@ -2702,7 +2768,7 @@ int main(void)
 					{
 						twolines("ÑÁÐÎÑ","");
 						sc_up=0;
-						scr_day(screenDay,1,0,0);
+						scr_day_clear(screenDay,1,0,0);
 						PrintN(&SCRN);
 					}
 					break;
@@ -2711,7 +2777,7 @@ int main(void)
 				{
 					if (sc_up)
 					{
-						scr_day(screenDay,1,0,0);	
+						scr_day(GlobalDay,1,0,0);	
 						placedchar(48+GlobalHr/10,34,1);
 						placedchar(48+GlobalHr%10,40,1);
 						if(blinkDot) {placedchar(58,45,1);}
@@ -2727,24 +2793,33 @@ int main(void)
 				{
 					if (sc_up)
 					{
-						twolines("ÈÄET ÑÁÐÎC","");
-						scr_day(screenDay,1,0,0);
-						PrintN(&SCRN);
-						if(screenDay>6)
+						if(screenDay==8)
 						{
-							uint8_t iDay=0;
-							for(iDay=0;iDay<7;iDay++)
-							{
-								CleanDay(iDay);
-								FlashRoyal(iDay);
-							}
+							scr_day_clear(screenDay,1,0,0);
+							PrintN(&SCRN);
 							HAL_Delay(400);
 						}
 						else 
 						{
-							CleanDay(screenDay);
-							FlashRoyal(screenDay);
-							HAL_Delay(800);
+							twolines("ÈÄET ÑÁÐÎC","");
+							scr_day_clear(screenDay,1,0,0);
+							PrintN(&SCRN);
+							if(screenDay>6)
+							{
+								uint8_t iDay=0;
+								for(iDay=0;iDay<7;iDay++)
+								{
+									CleanDay(iDay);
+									FlashRoyal(iDay);
+								}
+								HAL_Delay(400);
+							}
+							else 
+							{
+								CleanDay(screenDay);
+								FlashRoyal(screenDay);
+								HAL_Delay(800);
+							}
 						}
 						
 					}
@@ -2756,7 +2831,7 @@ int main(void)
 					if (sc_up)
 					{
 						sc_up=0;
-						twolines("","MODBUS");
+						twolines("ÏÀÐÀÌÅÒÐÛ","MODBUS");
 						PrintN(&SCRN);
 					}
 					break;
@@ -2984,21 +3059,29 @@ int main(void)
 								if((res_buffer[4]==0)&& canWrite(res_buffer[5],regAdr))
 								{
 									reg_MB[regAdr]=res_buffer[5];
-									if(res_buffer[3]==0x0E)
+									if(regAdr==0x01)
 									{
 										NeedChangeSpeed=1;
 										dt=res_buffer[5];
 									}
-									if(res_buffer[3]==0x03 || res_buffer[3]==0x04)
+									else if(regAdr==0x02 || regAdr==0x03)
 									{
 										RTC_DateTime.Hours = GlobalHr;
 										RTC_DateTime.Minutes = GlobalMin;
 										RTC_DateTime.Seconds = 00;
 										HAL_RTC_SetTime(&hrtc, &RTC_DateTime, RTC_FORMAT_BIN);
 									}
+									else if(regAdr==0x05)
+									{
+										RTC_Date1.Date = GlobalDay + 1;
+										RTC_Date1.Month = 7;
+										RTC_Date1.Year = 19;
+										RTC_Date1.WeekDay = GlobalDay + 1;
+										HAL_RTC_SetDate(&hrtc, &RTC_Date1, RTC_FORMAT_BIN);
+									}
 									
 									power=0;
-									FLSH_WRT_N=1;
+									//FLSH_WRT_N=1;
 									//FlashRoyal();
 									sc_up=1;
 									write_buffer[0]=res_buffer[0];					// àäðåñ áëîêà
