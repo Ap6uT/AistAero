@@ -629,6 +629,8 @@ volatile uint8_t pow_test = 0;
 volatile uint8_t power_ch = 0;
 uint8_t button = 0;
 volatile uint8_t FLSH_WRT_N=0;
+
+volatile uint8_t FLSH_WRT_N_MB=0;
 volatile uint8_t TIME_CH=0;
 volatile uint8_t VAR_CH=0;
 volatile uint8_t JUST_FIN=0;
@@ -2171,6 +2173,16 @@ int main(void)
 									screenDay=PlusOne(screenDay,9,but_plus | but_plus_ts);
 									break;
 								}
+								case 0x17:
+								{
+									MBAdr=PlusOne(MBAdr,247,but_plus | but_plus_ts);
+									break;
+								}
+								case 0x18:
+								{
+									MBSpeed=PlusOne(MBSpeed,9,but_plus | but_plus_ts);
+									break;
+								}
 							}
 						}		
 						
@@ -2893,11 +2905,13 @@ int main(void)
 					break;
 				}
 				
-				case 0x1A:
+				case 0x17:
 				{
 					if (sc_up)
 					{
+						FLSH_WRT_N_MB=1;
 						sc_up=0;
+
 						clearscreen(0);
 						oneline(0,"адрес");
 						switch(MBSpeed)
@@ -2937,10 +2951,11 @@ int main(void)
 					}
 					break;
 				}
-				case 0x2A:
+				case 0x18:
 				{
 					if (sc_up)
 					{
+						FLSH_WRT_N_MB=1;
 						NeedChangeSpeed=1;
 						sc_up=0;
 						clearscreen(0);
@@ -3060,6 +3075,18 @@ int main(void)
 									sc_up=1;
 
     		  	  	}
+								if (FLSH_WRT_N_MB && state!=0x17 && state!=0x18)
+    		  	  	{
+									FlashModbus();
+    		  	  		FLSH_WRT_N_MB=0;	
+									sc_up=1;
+    		  	  	}
+								if(NeedChangeSpeed)
+								{
+									NeedChangeSpeed=0;
+									USART2_ReInit(MBSpeed);
+									MX_TIM22_Init(MBSpeed);;
+								}
 
 		
 	if(FlagModbGet)
