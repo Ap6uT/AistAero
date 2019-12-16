@@ -47,6 +47,8 @@
 
 #define ST_ADR (uint32_t)(0x08007000)  
 
+#define ST_ADR_MB (uint32_t)(0x08007800)  
+
 
 #define ST_ADRp (ST_ADR+8) ////((uint32_t)0x08008800)
 
@@ -1334,6 +1336,32 @@ uint16_t HowTimeToStop(AeroTime time)
 	return 0;
 }
 
+uint8_t RegDay(uint16_t reg)
+{
+	if(reg<6)
+	{
+		return 0;
+	}
+	else if(reg<13)
+	{
+		return reg-5;
+	}
+	else if(reg<20)
+	{
+		return reg-12;
+	}
+	else
+	{
+		if(reg<116) {return 1;}
+		else if (reg<212) {return 2;}
+		else if (reg<308) {return 3;}
+		else if (reg<404) {return 4;}
+		else if (reg<500) {return 5;}
+		else if (reg<596) {return 6;}
+		else {return 7;}
+	}
+}
+
 void CleanDay(uint8_t day)
 {
 	if (day<7)
@@ -1381,6 +1409,28 @@ void FlashRoyal(uint8_t day)
 		}
 		HAL_FLASH_Lock();
 	}
+}
+
+void FlashModbus(void)
+{
+		uint32_t Buf;
+		uint32_t PgError = 0;
+		uint32_t adress = ST_ADR_MB;
+		Buf=(uint32_t)((uint8_t)(uint8_t)MBAdr*0x100+(uint8_t)MBSpeed);
+
+		HAL_FLASH_Unlock();
+		
+		FLASH_EraseInitTypeDef Flash_eraseInitStruct;
+		Flash_eraseInitStruct.TypeErase     = FLASH_TYPEERASE_PAGES;
+		Flash_eraseInitStruct.PageAddress  = adress;
+		Flash_eraseInitStruct.NbPages        = 1;
+
+		if(HAL_FLASHEx_Erase(&Flash_eraseInitStruct, &PgError) != HAL_OK)
+		{
+			 HAL_FLASH_Lock();
+		}
+		HAL_FLASH_Program(TYPEPROGRAM_WORD, adress,Buf);
+		HAL_FLASH_Lock();
 }
 
 
@@ -1620,7 +1670,7 @@ int main(void)
 	{
 		reg_MB[j]=0;
 	}
-	FBI[0]=FLASH_Read(ST_ADR);
+	FBI[0]=FLASH_Read(ST_ADR_MB);
 	
 	if((FBI[0] == 0)||(FBI[0]==0xFFFFFFFF))
 	{
@@ -1631,6 +1681,12 @@ int main(void)
 		FlashRoyal(4);
 		FlashRoyal(5);
 		FlashRoyal(6);
+		FlashModbus();
+	}
+	else 
+	{
+		MBAdr=FBI[0]%0x10000/0x100;
+		MBSpeed=FBI[0]%0x1000000;
 	}
 	for(k=0;k<7;k++)
 	{
@@ -1640,8 +1696,8 @@ int main(void)
 		}
 		*aeroDays[k].active=FBI[0]/0x1000000;
 		*aeroDays[k].daysCount=FBI[0]/0x10000%0x100;
-		MBAdr=FBI[0]%0x10000/0x100;
-		MBSpeed=FBI[0]%0x1000000;
+		//MBAdr=FBI[0]%0x10000/0x100;
+		//MBSpeed=FBI[0]%0x1000000;
 		
 		for(j=1;j<25;j++)
 		{
@@ -3078,6 +3134,10 @@ int main(void)
 										RTC_Date1.Year = 19;
 										RTC_Date1.WeekDay = GlobalDay + 1;
 										HAL_RTC_SetDate(&hrtc, &RTC_Date1, RTC_FORMAT_BIN);
+									}
+									else if(regAdr>0x05)
+									{
+										FLSH_WRT_N=RegDay(regAdr);
 									}
 									
 									power=0;
