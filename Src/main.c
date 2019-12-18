@@ -1316,7 +1316,7 @@ uint8_t timeToStart(AeroDay day)
 		uint8_t i;
 		for(i=0;i<*day.daysCount;i++)
 		{
-			if((*day.aeroTimes[i].startHour * 60 + *day.aeroTimes[i].startMin < RTC_DateTime.Hours * 60 + RTC_DateTime.Minutes) &&
+			if((*day.aeroTimes[i].startHour * 60 + *day.aeroTimes[i].startMin <= RTC_DateTime.Hours * 60 + RTC_DateTime.Minutes) &&
 				(*day.aeroTimes[i].stopHour * 60 + *day.aeroTimes[i].stopMin > RTC_DateTime.Hours * 60 + RTC_DateTime.Minutes))
 			{
 				return i + 1;
@@ -1327,10 +1327,10 @@ uint8_t timeToStart(AeroDay day)
 	return 0;
 }
 
-uint16_t HowTimeToStop(AeroTime time)
+uint32_t HowTimeToStop(AeroTime time)
 {
-	uint16_t stopTime = *time.stopHour * 60 + *time.stopMin;
-	uint16_t currentTime = RTC_DateTime.Hours * 60 + RTC_DateTime.Minutes;
+	uint32_t stopTime = *time.stopHour * 3600 + *time.stopMin *60;
+	uint32_t currentTime = RTC_DateTime.Hours * 3600 + RTC_DateTime.Minutes *60 + RTC_DateTime.Seconds;
 	if(stopTime > currentTime)
 	{
 		return (stopTime - currentTime);
@@ -1458,12 +1458,12 @@ void WakeRestart (void)
 		}
 		if (state==0x00)
 		{
-			twolines("ÊÎÐÌËÅÍÈÅ","");
+			twolines("ÀÝÐÀÖÈß","");
 			scr_time(GlobalHr,GlobalMin,1,0,0);
 			prev_min=RTC_DateTime.Minutes;
 
 		}
-		if ((state!=0x00)&&(state!=0x18)&&(state!=0x25))
+		if ((state!=0x00)&&(state!=0x11))
 		{
 			sc_up=1;
 			state=0x01;
@@ -1829,7 +1829,7 @@ int main(void)
 
     	TIM2->CR1 &= (uint16_t)(~((uint16_t)TIM_CR1_CEN));
 
-    	if((LOWPOWER==0)||(state==0x00)||(state==0x18)||(state==0x25))
+    	if((LOWPOWER==0)||(state==0x00)||(state==0x11))
 			{
 				if(state==0x00)
 				{
@@ -1898,8 +1898,9 @@ int main(void)
 				if(blinkDot) {blinkDot=0;}
 				else {blinkDot=1;}
 				sc_up=1;
+				prev_sec=RTC_DateTime.Seconds;
 			}
-			prev_sec=RTC_DateTime.Seconds;
+			
 			if(state != 0x00)
 			{
 				uint8_t needStart = timeToStart(aeroDays[RTC_Date1.WeekDay-1]);
@@ -1913,7 +1914,7 @@ int main(void)
 				prev_sec=61;
 				//clearscreen(0);
 				ClearArr();
-				MOTOR_TIME1=HowTimeToStop(aeroDays[RTC_Date1.WeekDay-1].aeroTimes[currentTime])*60;
+				MOTOR_TIME1=HowTimeToStop(aeroDays[RTC_Date1.WeekDay-1].aeroTimes[currentTime-1]);
 				NOTSLEEP=1;
     	}
 
@@ -1937,7 +1938,9 @@ int main(void)
 						{
 							HAL_TIM_Base_Stop_IT(&htim21);
 							MOTOR_TIME1=0;
-							power=0;				
+							power=0;	
+							*aeroDays[GlobalDay].active=0;
+							VAR_CH=GlobalDay+1;
 							reset_t=0;
 							blink=0;
 							placedchar(49,50,0);
@@ -2070,6 +2073,17 @@ int main(void)
 							blink=0;
 						}
 						
+						if(state==0x09 && col==0)
+						{
+							if(*aeroDays[screenDay].active)
+							{
+								*aeroDays[screenDay].active=0;
+							}
+							else
+							{
+								*aeroDays[screenDay].active=1;
+							}
+						}
 						if(col>1 && col <6)
 						{
 							switch (state)
@@ -2240,10 +2254,10 @@ int main(void)
 						SPI_syn_out(rele);
 						flag20=0;
 						wait=0;
-						NXT_TIME++;
+						//NXT_TIME++;
 						PrintN(&SCRN);
 					}
-					if (RTC_DateTime.Minutes!=prev_min)
+					/*if (RTC_DateTime.Minutes!=prev_min)
 					{
 						if(reScreen==0)
 						{
@@ -2264,13 +2278,15 @@ int main(void)
 						scr_time(GlobalHr,GlobalMin,1,0,0);
 						prev_min=RTC_DateTime.Minutes;
 						PrintN(&SCRN);
-					}
+					}*/
 					if (RTC_DateTime.Seconds!=prev_sec)
 					{
 						rele|=0x20;
 						delay(1);
 						SPI_syn_out(rele);
-						scr_time_down(MOTOR_TIME1-1,1,25,0);
+						twolines("ÀÝÐÎ","");
+						scr_time(GlobalHr,GlobalMin,0,25,0);
+						scr_time_down(MOTOR_TIME1-1,1,0,0);
 						MOTOR_TIME1--;
 						prev_sec=RTC_DateTime.Seconds;
 						PrintN(&SCRN);
@@ -2351,6 +2367,7 @@ int main(void)
 					if (sc_up)
 					{
 						twolines("ÓÑÒ","ÂÐÅÌß");
+						scr_day(GlobalDay,0,40,0);
 						sc_up=0;
 						//PrintN(&SCRN);
 					}
@@ -2384,6 +2401,7 @@ int main(void)
 					if (sc_up)
 					{
 						twolines("ÓÑÒ","ÂÐÅÌß");
+						scr_day(GlobalDay,0,40,0);
 						sc_up=0;
 						//PrintN(&SCRN);
 					}
