@@ -1908,14 +1908,16 @@ int main(void)
 			}
     	if (state!=0x00&&currentTime&&!VAR_CH&&!TIME_CH)
     	{
-				state=0x00;
-				sc_up=1;
-				prev_min = 61;
-				prev_sec=61;
-				//clearscreen(0);
-				ClearArr();
 				MOTOR_TIME1=HowTimeToStop(aeroDays[RTC_Date1.WeekDay-1].aeroTimes[currentTime-1]);
-				NOTSLEEP=1;
+				if(MOTOR_TIME1>1)
+				{
+					state=0x00;
+					sc_up=1;
+					prev_min = 61;
+					prev_sec=61;
+					ClearArr();
+					NOTSLEEP=1;
+				}
     	}
 
 
@@ -2436,6 +2438,14 @@ int main(void)
 					if (sc_up)
 					{
 						sc_up=0;
+						if(*aeroDays[screenDay].active) {
+							oneline(1,"  вкл");
+						}
+						else 
+						{
+							oneline(1,"  выкл");
+						}
+						scr_cnt(*aeroDays[screenDay].daysCount,1,40,0);
 						scr_day(screenDay,0,0,0);
 						scr_day(screenDay+1,0,20,0);
 						scr_day(screenDay+2,0,40,0);
@@ -2863,13 +2873,21 @@ int main(void)
 				{
 					if (sc_up)
 					{
-						scr_day(GlobalDay,1,0,0);	
-						placedchar(48+GlobalHr/10,34,1);
-						placedchar(48+GlobalHr%10,40,1);
-						if(blinkDot) {placedchar(58,45,1);}
-						else {placedchar(0x01,45,1);}
-						placedchar(48+GlobalMin/10,49,1);
-						placedchar(48+GlobalMin%10,55,1);
+						if(*aeroDays[GlobalDay].active) {
+							oneline(1,"вкл");
+						}
+						else 
+						{
+							oneline(1,"выкл");
+						}
+						scr_day(GlobalDay,0,35,0);	
+						placedchar(48+GlobalHr/10,0,0);
+						placedchar(48+GlobalHr%10,6,0);
+						if(blinkDot) {placedchar(58,11,0);}
+						else {placedchar(0x01,11,0);}
+						placedchar(48+GlobalMin/10,15,0);
+						placedchar(48+GlobalMin%10,21,0);
+						
 						sc_up=0;
 						PrintN(&SCRN);
 					}
