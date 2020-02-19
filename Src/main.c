@@ -1458,8 +1458,9 @@ void WakeRestart (void)
 		}
 		if (state==0x00)
 		{
-			twolines("ÀÝÐÀÖÈß","");
-			scr_time(GlobalHr,GlobalMin,1,0,0);
+			twolines("ÀÝÐÎ","");
+			scr_time(GlobalHr,GlobalMin,0,25,0);
+			scr_time_down(MOTOR_TIME1-1,1,0,0);
 			prev_min=RTC_DateTime.Minutes;
 
 		}
@@ -2250,7 +2251,9 @@ int main(void)
     		{
 					if (sc_up)
 					{
-						twolines("ÀÝÐÀÖÈß","");
+						twolines("ÀÝÐÎ","");
+						scr_time(GlobalHr,GlobalMin,0,25,0);
+						scr_time_down(MOTOR_TIME1-1,1,0,0);
 						sc_up=0;
 						rele|=0x20;
 						SPI_syn_out(rele);
@@ -3658,8 +3661,11 @@ void USART2_IRQHandler(void)
 			TIM22->CNT=0;
 			res_buffer[res_wr_index]=(uint8_t)(USART2->RDR);
 			//HAL_UART_Receive(&huart2, &x, 1, 100);
-			
-			res_wr_index++;						
+			if(res_wr_index<299)
+			{
+				res_wr_index++;		
+			}
+		
 				
 			TIM22->CR1 |= TIM_CR1_CEN; 
 	}
