@@ -1467,7 +1467,7 @@ void WakeRestart (void)
 		if ((state!=0x00)&&(state!=0x11))
 		{
 			sc_up=1;
-			state=0x01;
+			state=0x14;
 		}
 }
 
@@ -1650,7 +1650,8 @@ int main(void)
 	MX_IWDG_Init();
 
 	setAdressToStruct();
-	
+	rele&=0xDF;
+	SPI_syn_out(rele);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14 | GPIO_PIN_13,GPIO_PIN_RESET);
 	HAL_IWDG_Refresh(&hiwdg);
 	SPI_syn_out(0x00);
@@ -1757,7 +1758,10 @@ int main(void)
 	DEEPSLP=0;
 	HAL_UART_Transmit(&huart2,write_buffer,5,100);
 	HAL_UART_Receive_IT(&huart2, write_buffer, 15);
-	state=0x01;
+	rele&=0xDF;
+	SPI_syn_out(rele);
+	state=0x14;
+	screen_init();
   while (1)
   {
 		HAL_IWDG_Refresh(&hiwdg);
