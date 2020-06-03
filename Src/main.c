@@ -530,8 +530,9 @@ const unsigned char auchCRCLo[] =
 uint16_t reg_MB2[2][19];
 uint8_t reg_MB[800];
 
-const uint32_t USART_const [9] = {2400,4800,9600,14400,19200,38400,56000,57600,115200};
-const uint8_t  TIMER_const [9] = {15,8,4,3,2,2,2,2,2};
+const uint32_t USART_const [9] = {9600,4800,9600,14400,19200,38400,56000,57600,115200};
+//const uint8_t  TIMER_const [9] = {4,8,4,3,2,2,2,2,2};
+const uint8_t  TIMER_const [9] = {37,73,37,25,19,10,7,7,4};
 
 uint16_t CRCCod;
 
@@ -543,7 +544,7 @@ volatile uint8_t NeedChangeSpeed=0;
 
 unsigned char res_buffer[300];					// приемный буфер
 unsigned char write_buffer[300];					// буфер для передачи
-volatile unsigned char res_wr_index;
+volatile uint16_t res_wr_index;
 
 uint8_t uu=0;
 
@@ -672,7 +673,7 @@ uint8_t UnMin1, UnSec1 = 0;
 //uint8_t Per=0;
 //uint8_t CntFood=0;
 
-volatile unsigned char res_wr_index;
+
 
 uint32_t MOTOR_TIME=0;
 
@@ -737,9 +738,9 @@ static void MX_TIM22_Init(uint8_t bd)
 {
 	__HAL_RCC_TIM22_CLK_ENABLE();
   htim22.Instance = TIM22;
-  htim22.Init.Prescaler = 8000;
+  htim22.Init.Prescaler = 800-1;
   htim22.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim22.Init.Period = 2;
+  htim22.Init.Period = TIMER_const[bd]; 
   htim22.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim22) != HAL_OK)
   {
@@ -747,11 +748,10 @@ static void MX_TIM22_Init(uint8_t bd)
   }
 	
 	
-	TIM22->PSC = 8000 - 1; 
+	TIM22->PSC = 800 - 1; 
 	TIM22->ARR = TIMER_const[bd]; 
 	TIM22->DIER |= TIM_DIER_UIE; 
 	TIM22->CR1 |= TIM_CR1_OPM;
-	//TIM14->CR1 |= TIM_CR1_CEN; 
 	NVIC_SetPriority(TIM22_IRQn, 0); 
 	NVIC_EnableIRQ(TIM22_IRQn);
 }
